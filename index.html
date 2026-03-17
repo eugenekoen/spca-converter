@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPCA Volunteer Data Converter</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            z-index: 10;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        h1 {
+            margin: 0 0 1rem 0;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .file-upload-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(79, 70, 229, 0.1);
+            border-color: var(--primary-hover);
+        }
+
+        .file-upload-label svg {
+            margin-right: 12px;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .file-upload-label:hover svg {
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+            opacity: 0.5;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn.active:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.5);
+        }
+        
+        .btn.active:active {
+            transform: translateY(0);
+        }
+
+        .btn svg {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .status {
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            min-height: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .status.success {
+            color: var(--success);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .status.error {
+            color: #ef4444;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: #4F46E5;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: #10b981;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <div class="container">
+        <div class="card">
+            <h1>SPCA Data Converter</h1>
+            <p>Upload a volunteer application text file to convert and export it seamlessly into a structured CSV format.</p>
+            
+            <div class="file-upload-wrapper">
+                <label for="fileInput" class="file-upload-label" id="uploadLabel">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <span>Upload Txt File</span>
+                </label>
+                <input type="file" id="fileInput" accept=".txt">
+            </div>
+
+            <div id="statusMessage" class="status"></div>
+
+            <button id="processBtn" class="btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Process File
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('fileInput');
+            const uploadLabel = document.getElementById('uploadLabel');
+            const processBtn = document.getElementById('processBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            let fileContent = '';
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (!file.name.endsWith('.txt')) {
+                        statusMessage.textContent = 'Please upload a valid .txt file.';
+                        statusMessage.className = 'status error';
+                        processBtn.classList.remove('active');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        fileContent = evt.target.result;
+                        statusMessage.textContent = `✅ Success! File "${file.name}" has been uploaded.`;
+                        statusMessage.className = 'status success';
+                        uploadLabel.querySelector('span').textContent = file.name;
+                        processBtn.classList.add('active');
+                    };
+                    reader.onerror = function() {
+                        statusMessage.textContent = 'Error reading the file.';
+                        statusMessage.className = 'status error';
+                        processBtn.classList.remove('active');
+                    };
+                    reader.readAsText(file);
+                } else {
+                    processBtn.classList.remove('active');
+                    statusMessage.textContent = '';
+                    uploadLabel.querySelector('span').textContent = 'Upload Txt File';
+                }
+            });
+
+            processBtn.addEventListener('click', () => {
+                if (!fileContent) return;
+                
+                try {
+                    const csvData = parseSpcaTextToCSV(fileContent);
+                    downloadCSV(csvData, 'spca_volunteers_exported.csv');
+                    statusMessage.textContent = '🎉 File processed and exported successfully!';
+                    statusMessage.className = 'status success';
+                } catch (error) {
+                    console.error(error);
+                    statusMessage.textContent = '❌ Error processing file. Check format.';
+                    statusMessage.className = 'status error';
+                }
+            });
+
+            function parseSpcaTextToCSV(text) {
+                const expectedFields = [
+                    "First name",
+                    "Last name",
+                    "Email Address",
+                    "Tel. Number",
+                    "ID number",
+                ];
+                
+                const addressFields = [
+                    "Street Address",
+                    "Apartment, suite, etc",
+                    "City",
+                    "ZIP / Postal Code"
+                ];
+
+                const otherFields = [
+                    "I prefer to be contacted by",
+                    "Please indicate which of the following actitivies you would be willing to assist with",
+                    "Please indicate your availability",
+                    "Why would you like to volunteer?",
+                    "Do you volunteer for any other organisations, if yes, which ones?",
+                    "Consent"
+                ];
+
+                const headers = [
+                    "First Name", "Last Name", "Email Address", "Tel. Number", "ID Number",
+                    "Street Address", "Apartment, suite, etc", "City", "ZIP / Postal Code",
+                    "I prefer to be contacted by", "Activities willing to assist with",
+                    "Availability", "Why would you like to volunteer?", 
+                    "Do you volunteer for any other organisations, if yes, which ones?", "Consent"
+                ];
+
+                const lines = text.split(/\r?\n/);
+                const records = [];
+                let currentRecord = {};
+                let currentField = null;
+                
+                const pushRecord = () => {
+                    if (Object.keys(currentRecord).length > 0) {
+                        records.push(currentRecord);
+                        currentRecord = {};
+                    }
+                };
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.includes("New Form Entry #") || line === "--- This message was sent from https://spcadbn.org.za.") {
+                        pushRecord();
+                        currentField = null;
+                        continue;
+                    }
+
+                    if (line === '') continue;
+
+                    const matchedExpectedField = expectedFields.find(f => line === f);
+                    const matchedOtherField = otherFields.find(f => line === f);
+
+                    if (matchedExpectedField || matchedOtherField) {
+                        currentField = matchedExpectedField || matchedOtherField;
+                        currentRecord[currentField] = ""; 
+                        continue;
+                    }
+
+                    if (line === "Address") {
+                        currentField = "Address";
+                        continue;
+                    }
+
+                    if (currentField === "Address") {
+                        const colonIndex = line.indexOf(":");
+                        if (colonIndex !== -1) {
+                            const addKey = line.substring(0, colonIndex).trim();
+                            const addVal = line.substring(colonIndex + 1).trim();
+                            if (addressFields.includes(addKey)) {
+                                currentRecord[addKey] = addVal;
+                            }
+                        }
+                    } else if (currentField) {
+                        if (currentRecord[currentField] !== "") {
+                            currentRecord[currentField] += " " + line;
+                        } else {
+                            currentRecord[currentField] = line;
+                        }
+                    }
+                }
+                pushRecord(); 
+
+                let csvContent = headers.map(h => `"${h}"`).join(",") + "\n";
+                
+                records.forEach(rec => {
+                    const row = [
+                        rec["First name"] || "",
+                        rec["Last name"] || "",
+                        rec["Email Address"] || "",
+                        rec["Tel. Number"] || "",
+                        rec["ID number"] || "",
+                        rec["Street Address"] || "",
+                        rec["Apartment, suite, etc"] || "",
+                        rec["City"] || "",
+                        rec["ZIP / Postal Code"] || "",
+                        rec["I prefer to be contacted by"] || "",
+                        rec["Please indicate which of the following actitivies you would be willing to assist with"] || "",
+                        rec["Please indicate your availability"] || "",
+                        rec["Why would you like to volunteer?"] || "",
+                        rec["Do you volunteer for any other organisations, if yes, which ones?"] || "",
+                        rec["Consent"] || ""
+                    ];
+
+                    const csvRow = row.map(val => `"${val.replace(/"/g, '""')}"`).join(",");
+                    csvContent += csvRow + "\n";
+                });
+
+                return csvContent;
+            }
+
+            function downloadCSV(csvContent, filename) {
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
